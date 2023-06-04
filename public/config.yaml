@@ -1,0 +1,949 @@
+openapi: 3.0.1
+info:
+  title: Лабораторная работа 3 - Поезда и расписание
+  description: |-
+    Это документация к лабораторной работе 3 по предмету Программная инженерия управляющих систем. Здесь описаны все эндпоинты, реализованные в проекте лабораторной работы.
+  version: "1.0.0"
+  contact:
+    name: "Петроченко Нина Антоновна"
+    email: "ninopetrochenko@yandex.ru"
+
+servers:
+  - url: http://127.0.0.1:8000/api/v1/
+tags:
+  - name: trains
+    description: All information about trains
+    externalDocs:
+      description: Show endpoints
+      url: http://swagger.io
+  - name: trips
+    description: All information about schedule
+    externalDocs:
+      description: Show endpoints
+      url: http://swagger.io
+paths:
+  /trains:
+    get:
+      tags:
+        - trains
+      summary: Returns all trains
+      operationId: getTrains
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Train"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    post:
+      tags:
+        - trains
+      summary: Add new train
+      operationId: addTrain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Train'
+        '405':
+          description: Invalid input
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+        
+
+  /trains/{train_id}:
+    get:
+      summary: Get information about concrete train
+      operationId: getTrainById
+      tags:
+        - trains
+      parameters:
+        - name: train_id
+          in: path
+          required: true
+          description: Field to find train
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Train"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Train was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    put:
+      tags:
+        - trains
+      summary: Update all fields in specific train
+      operationId: updateTrain
+      parameters:
+        - name: train_id
+          in: path
+          required: true
+          description: Field to update train
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+        required: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Train"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Train was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    patch:
+      summary: Update concrete fields in specific train
+      operationId: changeTrain
+      tags:
+        - trains
+      parameters:
+        - name: train_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: departure_station
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: arrival_station
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: departure_time
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: arrival_time
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: cars_number
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Train"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Train was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    delete:
+      tags:
+        - trains
+      summary: Delete train by trainId
+      operationId: deleteTrain
+      parameters:
+        - name: train_id
+          in: path
+          description: Id of train to delete it
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Train"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Train was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+
+
+  /trips:
+    get:
+      tags:
+        - trips
+      summary: Returns all trips
+      operationId: getTrips
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Trip"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Trip was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    post:
+      tags:
+        - trips
+      summary: Add new trip
+      operationId: addTrip
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+        required: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Trip"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Trip was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+
+  /trips/{id}:
+    get:
+      summary: Information about concrete trip
+      operationId: getTripById
+      tags:
+        - trips
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Field to find trip
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Trip"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Trip was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    put:
+      tags:
+        - trips
+      summary: Обновить информацию об определенном рейсе
+      operationId: updateTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Поле, по которому обновляется конкретный рейс
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+        required: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Trip"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Trip was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    patch:
+      summary: Update concrete fields in specific trip
+      operationId: changeTrain
+      tags:
+        - trips
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: departure_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: train_id
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: tickets_count
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: ticket_price
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Trip"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Trip was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+    delete:
+      tags:
+        - trips
+      summary: Delete trip by id
+      operationId: deleteTrip
+      parameters:
+        - name: id
+          in: path
+          description: Trip id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Trip"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '404':
+          description: Trip was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta:
+                    type: object
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Error"
+                  meta: 
+                    type: object
+
+components:
+  schemas:
+    Train:
+      type: object
+      properties:
+        train_id:
+          type: integer
+          format: int64
+          example: 198772
+        departure_station:
+          type: string
+          example: Москва
+        arrival_station:
+          type: string
+          example: Санкт-Петербург
+        departure_time:
+          type: string
+          example: 15:30
+        arrival_time:
+          type: string
+          example: 17:30
+        cars_number:
+          type: integer
+          description: Count of cars in the train
+          example: 7
+    Trip:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 12
+        departure_date:
+          type: string
+          format: date
+          example: 15.06.2023
+        train_id:
+          type: integer
+          format: int64
+          example: 198772
+        ticket_count:
+          type: integer
+          format: int64
+          example: 100
+        ticket_price: 
+          type: integer
+          format: int64
+          description: Ticket price in penny
+          example: 186400
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
